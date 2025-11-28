@@ -7,7 +7,7 @@ This document provides an overview of all available API endpoints in the project
 ## **Base URL**
 
 ```
-/api
+/
 ```
 
 > Note: Adjust the base URL based on your environment (local, dev, production).
@@ -132,16 +132,6 @@ None.
 }
 ```
 
-**Invalid Response Example:**
-
-```json
-{
-  "valid": false,
-  "message": "Invalid or expired token"
-}
-```
-
----
 
 # **Notes**
 
