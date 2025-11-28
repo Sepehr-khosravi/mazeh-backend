@@ -1,0 +1,95 @@
+# ───────────────────────────────────────────────
+# Node & Build Output
+# ───────────────────────────────────────────────
+/node_modules
+/dist
+/build
+
+# ───────────────────────────────────────────────
+# Environment Files
+# ───────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ───────────────────────────────────────────────
+# Prisma
+# ───────────────────────────────────────────────
+# If Prisma generates a client in node_modules, no need to ignore separately.
+# If you generate custom prisma clients, ignore here:
+prisma/generated/
+generated/
+*.db-journal
+
+# ───────────────────────────────────────────────
+# Logs
+# ───────────────────────────────────────────────
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Diagnostic reports
+report.*.json
+
+# ───────────────────────────────────────────────
+# NestJS Specific
+# ───────────────────────────────────────────────
+.nestjs-cache
+*.tsbuildinfo
+
+# ───────────────────────────────────────────────
+# Tests
+# ───────────────────────────────────────────────
+/coverage
+/.nyc_output
+/jest-*.xml
+/junit.xml
+/test-results/
+
+# ───────────────────────────────────────────────
+# Docker
+# ───────────────────────────────────────────────
+# Docker creates temp build layers sometimes
+*.tgz
+
+# ───────────────────────────────────────────────
+# Cache & Temp Files
+# ───────────────────────────────────────────────
+.cache
+.temp
+.tmp
+.eslintcache
+
+# ───────────────────────────────────────────────
+# OS Files
+# ───────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ───────────────────────────────────────────────
+# Editors & IDEs
+# ───────────────────────────────────────────────
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ───────────────────────────────────────────────
+# Misc
+# ───────────────────────────────────────────────
+*.swp
+*.swo

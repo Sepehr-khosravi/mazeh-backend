@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: cooking
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: "postgresql://postgres:1234@postgres:5432/cooking?schema=public"
+      PORT: 3000
+      JWT_KEY: "jwhfdkjsahfu34hrjksdfjkashfdkjhwqkejfb"
+    ports:
+      - "3000:3000"
+    command: npm run start:docker
+
+volumes:
+  postgres_data:
