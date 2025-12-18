@@ -1,26 +1,95 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider   = "prisma-client-js"
   engineType = "binary"
 }
 
-// Database connection
 datasource db {
   provider = "postgresql"
 }
 
-// Models
+// ============================
+// User Model
+// ============================
 model User {
-  id        Int     @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   username  String
-  email     String  @unique
+  email     String   @unique
   password  String
-
+  profile   String   @default("https://www.transparentpng.com/download/user/gray-user-profile-icon-png-fP8Q1P.png")
+  refrigerator   Refrigerator[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+
+// ============================
+// Recipe
+// ============================
+model Recipe {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  time        Int    
+  image       String 
+  icon        String
+  category    String
+  nationality String
+  rate        Float     @default(5.0)
+  difficulty  String
+  description String
+  meal        String
+
+  gallery     Gallery[]
+  ingredients Ingredient[]
+  steps       Step[]
+}
+
+
+// ============================
+// Gallery
+// ============================
+model Gallery {
+  id        Int     @id @default(autoincrement())
+  url       String
+  recipeId  Int
+
+  recipe    Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+}
+
+
+// ============================
+// Ingredient
+// ============================
+model Ingredient {
+  id        Int     @id @default(autoincrement())
+  name      String
+  amount    String
+  recipeId  Int
+
+  recipe    Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+}
+
+
+// ============================
+// Step
+// ============================
+model Step {
+  id          Int     @id @default(autoincrement())
+  order       Int
+  description String
+  recipeId    Int
+
+  recipe      Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+}
+
+
+model Refrigerator {
+  id     Int    @id @default(autoincrement())
+  name   String @unique
+  amount Int    @default(100)
+  userId Int
+
+  user   User   @relation(fields: [userId], references : [id], onDelete: Cascade)
+} 
