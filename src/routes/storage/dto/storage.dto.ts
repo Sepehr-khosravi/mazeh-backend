@@ -6,9 +6,3 @@ export class MaterialDto{
     @IsString()
     name : string;
 }
-
-export class IdDto{
-    @IsNotEmpty()
-    @IsNumber()
-    id : number;
-}
