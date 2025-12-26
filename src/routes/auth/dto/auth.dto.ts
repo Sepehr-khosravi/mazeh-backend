@@ -28,7 +28,7 @@ export class RegisterDto{
 export class VerifyTokenDto{
     @IsNotEmpty()
     @IsString()
-    id : string;
+    id : number;
     @IsNotEmpty()
     @IsString()
     @IsEmail()
