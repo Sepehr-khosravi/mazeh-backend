@@ -20,8 +20,9 @@ jest.mock("bcrypt", () => ({
 import * as bcrypt from "bcrypt";
 
 
-import { LoginDto, RegisterDto } from "./dto";
-import { BadRequestException, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { LoginDto, RegisterDto, VerifyTokenDto } from "./dto";
+import { BadRequestException, InternalServerErrorException, NotFoundException, CanActivate } from '@nestjs/common';
+import { AuthGuard } from "src/common/Guards/auth/jwt-auth.guard";
 
 
 
@@ -147,7 +148,7 @@ describe("AuthService - login", () => {
 
 describe("AuthService - register", () => {
 
-    let dtoRegister : RegisterDto = {
+    let dtoRegister: RegisterDto = {
         username: "test",
         email: "test@gmail.com",
         password: "1234567"
@@ -192,18 +193,18 @@ describe("AuthService - register", () => {
     it("should create a new User and return the result", async () => {
         mockPrisma.user.findFirst.mockResolvedValue(undefined);
         mockPrisma.user.create.mockResolvedValue({
-                id : 1 ,
-                email: dtoRegister.email,
-                username: dtoRegister.email,
-                password: "1234567"
+            id: 1,
+            email: dtoRegister.email,
+            username: dtoRegister.email,
+            password: "1234567"
         });
         (bcrypt.genSalt as jest.Mock).mockImplementation(async () => "1");
         (bcrypt.hash as jest.Mock).mockImplementation(async () => "1234567");
 
         mockJwt.signAsync.mockResolvedValue("943kfnij9lsrknjg4ghdfhg");
         const result = await authService.register(dtoRegister);
-        
-        
+
+
         expect(result).toEqual(expect.objectContaining({
             message: expect.any(String),
             data: {
@@ -214,5 +215,50 @@ describe("AuthService - register", () => {
             }
         }))
 
+    })
+});
+
+
+describe("AuthService - verifyTokens", () => {
+    let authService: AuthService;
+    beforeEach(async () => {
+        jest.clearAllMocks();
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                AuthService,
+                {
+                    provide : PrismaService, 
+                    useValue : mockPrisma,
+                },
+                {
+                    provide : ConfigService,
+                    useValue :mockConfig
+                },
+                {
+                    provide : JwtService,
+                    useValue : mockJwt
+                }
+            ]
+        }).overrideGuard(AuthGuard).useValue({ canActivate: () => true }).compile();
+
+        authService = module.get<AuthService>(AuthService);
+    });
+
+
+    it("should return the correct result ", async () => {
+        const req: VerifyTokenDto = {
+            id: 1,
+            email: "test@gmail.com",
+        };
+
+        const result = await authService.verifyTokens(req);
+
+        expect(result).toEqual(expect.objectContaining({
+            message: expect.any(String),
+            data: {
+                id: expect.any(Number),
+                email: expect.any(String)
+            }
+        }));
     })
 })
