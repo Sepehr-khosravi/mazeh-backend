@@ -10,7 +10,9 @@ import { JwtService } from "@nestjs/jwt";
 
 
 jest.mock("bcrypt", () => ({
-    compare: jest.fn()
+    compare: jest.fn(),
+    genSalt: jest.fn(),
+    hash: jest.fn()
 }))
 
 
@@ -18,7 +20,7 @@ jest.mock("bcrypt", () => ({
 import * as bcrypt from "bcrypt";
 
 
-import { LoginDto } from "./dto";
+import { LoginDto, RegisterDto } from "./dto";
 import { BadRequestException, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 
 
@@ -138,6 +140,79 @@ describe("AuthService - login", () => {
             }
         }))
 
+
+    })
+});
+
+
+describe("AuthService - register", () => {
+
+    let dtoRegister : RegisterDto = {
+        username: "test",
+        email: "test@gmail.com",
+        password: "1234567"
+    }
+    let authService: AuthService;
+
+    beforeAll(async () => {
+        jest.clearAllMocks();
+
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                AuthService,
+                {
+                    provide: PrismaService,
+                    useValue: mockPrisma
+                },
+                {
+                    provide: ConfigService,
+                    useValue: mockConfig
+                },
+                {
+                    provide: JwtService,
+                    useValue: mockJwt
+                },
+            ]
+        }).compile();
+
+        authService = module.get<AuthService>(AuthService);
+    });
+
+    it("should thorw BadRequest if user has already existed", async () => {
+        mockPrisma.user.findFirst.mockResolvedValue({
+            id: 1,
+            username: "Test",
+            email: "test@gmail.com",
+            password: "1234567"
+        });
+
+        await expect(authService.register(dtoRegister)).rejects.toThrow(BadRequestException);
+    })
+
+    it("should create a new User and return the result", async () => {
+        mockPrisma.user.findFirst.mockResolvedValue(undefined);
+        mockPrisma.user.create.mockResolvedValue({
+                id : 1 ,
+                email: dtoRegister.email,
+                username: dtoRegister.email,
+                password: "1234567"
+        });
+        (bcrypt.genSalt as jest.Mock).mockImplementation(async () => "1");
+        (bcrypt.hash as jest.Mock).mockImplementation(async () => "1234567");
+
+        mockJwt.signAsync.mockResolvedValue("943kfnij9lsrknjg4ghdfhg");
+        const result = await authService.register(dtoRegister);
+        
+        
+        expect(result).toEqual(expect.objectContaining({
+            message: expect.any(String),
+            data: {
+                id: expect.any(Number),
+                username: expect.any(String),
+                email: expect.any(String),
+                token: expect.any(String)
+            }
+        }))
 
     })
 })
