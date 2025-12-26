@@ -11,20 +11,29 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   api:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: nestjs-api
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       DATABASE_URL: "postgresql://postgres:1234@postgres:5432/cooking?schema=public"
       PORT: 3000
       JWT_KEY: "jwhfdkjsahfu34hrjksdfjkashfdkjhwqkejfb"
+      NODE_ENV: production
     ports:
       - "3000:3000"
-    command: npm run start:docker
+    # Remove volumes for production
+    # For development only: - ./src:/app/src
 
 volumes:
   postgres_data:

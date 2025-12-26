@@ -1,35 +1,37 @@
-# Builder Stage
-FROM node:24 AS builder
+FROM node:18-alpine AS builder
+
 WORKDIR /app
 
-# Copy package.json + package-lock.json
 COPY package*.json ./
-COPY tsconfig.json ./
+COPY prisma ./prisma/
+RUN npm ci
 
-RUN npm install
-
-# Copy the rest of the project (including tsconfig.json and src/)
 COPY . .
-
-# Generate Prisma client
-RUN npx prisma generate --schema=prisma/schema.prisma
-
-# Build NestJS
 RUN npm run build
+RUN npx prisma generate
 
-# Production Stage
-FROM node:24-slim AS production
+FROM node:18-alpine
+
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install --omit=dev
+COPY --from=builder /app/package*.json ./
+RUN npm ci --only=production
 
-# Copy built code + Prisma client + env
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/tsconfig.json ./tsconfig.json
-COPY --from=builder /app/.env .env
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+
+# Install netcat for waiting
+USER root
+RUN apk add --no-cache netcat-openbsd
+RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001
+USER nestjs
 
 EXPOSE 3000
-CMD ["node", "dist/src/main.js"]
+
+# Create wait script
+COPY --from=builder /app/wait-for-db.sh ./wait-for-db.sh
+RUN chmod +x ./wait-for-db.sh
+
+CMD ["./wait-for-db.sh", "postgres", "5432", "npx prisma migrate deploy && node dist/main.js"]
