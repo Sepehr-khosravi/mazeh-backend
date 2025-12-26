@@ -1,7 +1,7 @@
-import { Injectable} from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 //error handeler:
 import {
-  InternalServerErrorException ,
+  InternalServerErrorException,
   BadRequestException,
   NotFoundException,
 } from "@nestjs/common";
@@ -14,61 +14,63 @@ import * as bcrypt from "bcrypt";
 
 //dto
 import {
-  LoginDto, 
+  LoginDto,
   RegisterDto,
   VerifyTokenDto
 } from "./dto";
 
 //auth Service:
 @Injectable({})
-export class AuthService{
+export class AuthService {
   //services:
   constructor(
-    private prismaService : PrismaService,
-    private configService : ConfigService,
-    private jwtService : JwtService
-  ){};
-  async login(dto : LoginDto){
-    try{
+    private prismaService: PrismaService,
+    private configService: ConfigService,
+    private jwtService: JwtService
+  ) { };
+  async login(dto: LoginDto) {
+    try {
       //checking is user exist?
-      const user = await this.prismaService.user.findFirst({where : {email : dto.email}});
-      if(!user){
+      const user = await this.prismaService.user.findFirst({ where: { email: dto.email } });
+      if (!user) {
         throw new NotFoundException("User Not Found, Please Try Again!");
       }
       //checking user password
       const isPasswordValid = await bcrypt.compare(dto.password, user.password);
-      if(!isPasswordValid){
+      if (!isPasswordValid) {
         throw new BadRequestException("Invalid Data, Please Try Again!");
       }
       //building token
-      const token = await this.jwtService.signAsync({id : user.id, email : user.email}, {
-        secret : this.configService.get("JWT_KEY")
+      const token = await this.jwtService.signAsync({ id: user.id, email: user.email }, {
+        secret: this.configService.get("JWT_KEY")
       })
-      if(!token) throw new InternalServerErrorException("Internal Server Error In Building Token!");
+      if (!token) throw new InternalServerErrorException("Internal Server Error In Building Token!");
       //responsing
       return {
-        message : "ok",
-        data : {
-          id : user.id,
-          username : user.username,
-          email : user.email,
-          token : token
+        message: "ok",
+        data: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          token: token
         }
       };
     }
-    catch(e : any){
-      if(e instanceof BadRequestException || e instanceof NotFoundException) return {
-        message : e instanceof NotFoundException ? "Data Not Found, Please Try Again!" : "Invalid Data, PLease Try Again!"
-      };
-      console.log("Internal Server Error in login method from auth.service.ts : ", e);
-      throw new InternalServerErrorException("Internal Server Error!");
+    catch (e: any) {
+      if (e instanceof NotFoundException || e instanceof BadRequestException) {
+        throw e;
+      }
+      throw new InternalServerErrorException("Internal Server Error", {
+        cause: new Error(),
+        description: e + "from login method in auth.service.ts"
+      });
     }
   }
-  async register(dto: RegisterDto){
-    try{
+  async register(dto: RegisterDto) {
+    try {
       //check is user exists?
-      const user = await this.prismaService.user.findFirst({where : {email : dto.email}});
-      if(user){
+      const user = await this.prismaService.user.findFirst({ where: { email: dto.email } });
+      if (user) {
         throw new BadRequestException("Invalid Data, Please Try Again!")
       }
       //hashing password
@@ -76,45 +78,49 @@ export class AuthService{
       const hash = await bcrypt.hash(dto.password, salt);
       //creating a new User
       const newUser = await this.prismaService.user.create({
-        data : {
-          email : dto.email,
-          username : dto.username,
-          password : hash
+        data: {
+          email: dto.email,
+          username: dto.username,
+          password: hash
         }
       });
       //building token :
-      const token = await this.jwtService.signAsync({id : newUser.id, email : newUser.email}, {
-        secret : this.configService.get("JWT_KEY")
+      const token = await this.jwtService.signAsync({ id: newUser.id, email: newUser.email }, {
+        secret: this.configService.get("JWT_KEY")
       });
-      if(!token) throw new InternalServerErrorException("Internal Server Error In Building Token!");
+      if (!token) throw new InternalServerErrorException("Internal Server Error In Building Token!");
       //responsing
       return {
-        message : "ok",
-        data : {
-            id : newUser.id,
-            email : newUser.email,
-            username : newUser.username,
-            token : token
+        message: "ok",
+        data: {
+          id: newUser.id,
+          email: newUser.email,
+          username: newUser.username,
+          token: token
         }
       };
     }
-    catch(e : any){
-      if(e instanceof BadRequestException) return {
-        message : "Invalid Data, PLease Try Again"
-      };
-      console.log("Internal Server Error in register method from auth.service.ts file! : ", e);
-      throw new InternalServerErrorException("Internal Server Error!");
+    catch (e: any) {
+      if (e instanceof NotFoundException || e instanceof BadRequestException) {
+        throw e;
+      }
+      throw new InternalServerErrorException("Internal Server Error", {
+        cause: new Error(),
+        description: e + "from login method in auth.service.ts"
+      });
     }
   }
   //checking token
-  async verifyTokens(data : VerifyTokenDto ){
-    try{
-      return {message : "ok", data : {
-        id : data.id,
-        email : data.email
-      }};
+  async verifyTokens(data: VerifyTokenDto) {
+    try {
+      return {
+        message: "ok", data: {
+          id: data.id,
+          email: data.email
+        }
+      };
     }
-    catch(e : any){
+    catch (e: any) {
       throw new InternalServerErrorException("Internal Server Error in verifyTokens method from auth.service.ts file!");
     }
   }
