@@ -5,7 +5,6 @@ yarn-error.log
 
 #build output
 dist
-.prisma
 
 #env files never put secrets in image
 # .env
@@ -13,7 +12,8 @@ dist
 # =!.env.example
 
 #git repo
-.git.gitignore
+.git
+.gitignore
 
 #Editor filters
 .vscode
@@ -29,3 +29,10 @@ logs
 #Docker cache & temp
 tmp
 .cache
+
+#README file 
+README.md 
+
+#documentations :
+docs
+

@@ -1,29 +1,27 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider   = "prisma-client-js"
-  engineType = "binary"
+  provider       = "prisma-client-js"
+  output         = "./generated/client"
+  binaryTargets  = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // ============================
 // User Model
 // ============================
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String
-  email     String   @unique
-  password  String
-  profile   String   @default("https://www.transparentpng.com/download/user/gray-user-profile-icon-png-fP8Q1P.png")
-  refrigerator   Refrigerator[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           Int             @id @default(autoincrement())
+  username     String
+  email        String          @unique
+  password     String
+  profile      String          @default("https://www.transparentpng.com/download/user/gray-user-profile-icon-png-fP8Q1P.png")
+  refrigerator Refrigerator[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 }
-
 
 // ============================
 // Recipe
@@ -46,7 +44,6 @@ model Recipe {
   steps       Step[]
 }
 
-
 // ============================
 // Gallery
 // ============================
@@ -57,7 +54,6 @@ model Gallery {
 
   recipe    Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 }
-
 
 // ============================
 // Ingredient
@@ -71,7 +67,6 @@ model Ingredient {
   recipe    Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 }
 
-
 // ============================
 // Step
 // ============================
@@ -84,12 +79,14 @@ model Step {
   recipe      Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 }
 
-
+// ============================
+// Refrigerator
+// ============================
 model Refrigerator {
   id     Int    @id @default(autoincrement())
   name   String @unique
   amount Int    @default(100)
   userId Int
 
-  user   User   @relation(fields: [userId], references : [id], onDelete: Cascade)
-} 
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

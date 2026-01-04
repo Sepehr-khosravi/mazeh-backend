@@ -1,37 +1,36 @@
-FROM node:18-alpine AS builder
+# ---------- Build stage ----------
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
+# نصب openssl برای Prisma generate
+RUN apt-get update -y && apt-get install -y openssl \
+    && groupadd app && useradd -g app app
+
 COPY package*.json ./
-COPY prisma ./prisma/
-RUN npm ci
+RUN npm install
+
+COPY prisma ./prisma
+RUN npx prisma generate
 
 COPY . .
 RUN npm run build
-RUN npx prisma generate
 
-FROM node:18-alpine
+# ---------- Runtime stage ----------
+FROM node:20-slim
 
 WORKDIR /app
 
-COPY --from=builder /app/package*.json ./
-RUN npm ci --only=production
+# نصب OpenSSL runtime
+RUN apt-get update -y && apt-get install -y openssl \
+    && groupadd app && useradd -g app app
 
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/dist ./dist
+COPY package*.json ./
 
-# Install netcat for waiting
-USER root
-RUN apk add --no-cache netcat-openbsd
-RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001
-USER nestjs
-
+USER app
 EXPOSE 3000
 
-# Create wait script
-COPY --from=builder /app/wait-for-db.sh ./wait-for-db.sh
-RUN chmod +x ./wait-for-db.sh
-
-CMD ["./wait-for-db.sh", "postgres", "5432", "npx prisma migrate deploy && node dist/main.js"]
+CMD ["node", "dist/main.js"]

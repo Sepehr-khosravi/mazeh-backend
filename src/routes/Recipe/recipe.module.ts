@@ -3,8 +3,8 @@ import { Module } from "@nestjs/common";
 import { PrismaModule } from "src/common/prisma/prisma.module";
 
 //provider & contorller
-import { RecipeService } from "./recipe.service";
 import { RecipeController } from "./recipe.controller";
+import { RecipeService } from "./recipe.service";
 
 @Module({
     imports : [

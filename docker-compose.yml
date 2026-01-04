@@ -17,23 +17,20 @@ services:
       timeout: 5s
       retries: 5
 
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: nestjs-api
+  server:
+    build: .
+    image: server
+    container_name: mazeh_server
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: "postgresql://postgres:1234@postgres:5432/cooking?schema=public"
-      PORT: 3000
-      JWT_KEY: "jwhfdkjsahfu34hrjksdfjkashfdkjhwqkejfb"
+      DATABASE_URL: postgresql://postgres:1234@postgres:5432/cooking
       NODE_ENV: production
+      PORT: 3000
     ports:
       - "3000:3000"
-    # Remove volumes for production
-    # For development only: - ./src:/app/src
+    command: sh -c "npx prisma migrate deploy && node dist/main.js"
 
 volumes:
   postgres_data:
