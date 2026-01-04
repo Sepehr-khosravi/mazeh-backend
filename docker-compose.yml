@@ -2,35 +2,29 @@ services:
   postgres:
     image: postgres:15
     container_name: postgres
-    restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: cooking
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - pgdata:/var/lib/postgresql/data
 
-  server:
+  mazeh_server_test:
+    container_name: mazeh_server_test
     build: .
-    image: server
-    container_name: mazeh_server
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      DATABASE_URL: postgresql://postgres:1234@postgres:5432/cooking
-      NODE_ENV: production
-      PORT: 3000
+    image : server-test
+    command: sh -c "npx prisma migrate dev && npm run start:dev"
+    volumes:
+      - .:/app
+      - /app/node_modules
     ports:
       - "3000:3000"
-    command: sh -c "npx prisma migrate deploy && node dist/main.js"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/cooking
+    depends_on:
+      - postgres
 
 volumes:
-  postgres_data:
+  pgdata:
