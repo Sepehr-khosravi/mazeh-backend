@@ -4,7 +4,8 @@ import {
   Body,
   Get,
   UseGuards,
-  Req
+  Req,
+  Version
 } from "@nestjs/common";
 
 //provider
@@ -28,11 +29,13 @@ export class AuthController{
   ){}
   //login route /auth/login
   @Post("login")
+  @Version("1")
   login(@Body() dto : LoginDto){
     return this.authService.login(dto)
   }
   //register route /auth/register
   @Post("register")
+  @Version("1")
   register(@Body() dto : RegisterDto){
     return this.authService.register(dto);
   }
@@ -40,6 +43,7 @@ export class AuthController{
   @UseGuards(AuthGuard)
   //verify route /auth/verify
   @Get("verify")
+  @Version("1")
   verifyToken(@Req() req){
     return this.authService.verifyTokens(req.user)
   }

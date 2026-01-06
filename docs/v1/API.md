@@ -7,7 +7,7 @@ This document provides a clear and complete overview of all available API endpoi
 ## **Base URL**
 
 ```
-/
+/api/v1
 ```
 
 > Note: Adjust the base URL based on your environment (local, development, or production).

@@ -4,7 +4,8 @@ import {
     Get,
     Post,
     UseGuards,
-    Delete
+    Delete,
+    Version
 } from "@nestjs/common";
 
 //provider
@@ -29,18 +30,21 @@ export class RecipeController{
     ){};
     //for getting List of Recipes
     @Get() //route /recipe (Get Method)
+    @Version("1")
     findAll(){
         return this.recipeService.findAll();
     }
     
     @Post("add") // route : /recipe/add (Post method!)
     //for adding a new recipe
+    @Version("1")
     addRecipe(@Body() dto : recipeDto){
         return this.recipeService.addRecipe(dto);
     }
 
     @Delete("delete")// route : /recipe/delete (Delete method!)
     //for deleting a special recipe
+    @Version("1")
     deleteRecipe(@Body() dto : deleteDto){
         return this.recipeService.deleteRecipe(dto.id);
     }
