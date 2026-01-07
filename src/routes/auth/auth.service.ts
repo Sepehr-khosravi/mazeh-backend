@@ -1,127 +1,114 @@
-import { Injectable } from "@nestjs/common";
-//error handeler:
-import {
-  InternalServerErrorException,
-  BadRequestException,
-  NotFoundException,
-} from "@nestjs/common";
+import { Injectable, BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { PrismaService } from 'src/common/prisma/prisma.service';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { LoginDto, RegisterDto, VerifyTokenDto } from './dto';
 
-//providers
-import { PrismaService } from "src/common/prisma/prisma.service";
-import { ConfigService } from "@nestjs/config";
-import { JwtService } from "@nestjs/jwt";
-import * as bcrypt from "bcrypt";
-
-//dto
-import {
-  LoginDto,
-  RegisterDto,
-  VerifyTokenDto
-} from "./dto";
-
-//auth Service:
-@Injectable({})
+@Injectable()
 export class AuthService {
-  //services:
   constructor(
-    private prismaService: PrismaService,
-    private configService: ConfigService,
-    private jwtService: JwtService
-  ) { };
+    private readonly prismaService: PrismaService,
+    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
+  ) {}
+
   async login(dto: LoginDto) {
     try {
-      //checking is user exist?
-      const user = await this.prismaService.user.findFirst({ where: { email: dto.email } });
+      const user = await this.prismaService.user.findFirst({
+        where: {
+          OR: [
+            { email: dto.email },
+            { username: dto.username },
+          ],
+        },
+      });
+
       if (!user) {
-        throw new NotFoundException("User Not Found, Please Try Again!");
+        throw new NotFoundException('User not found');
       }
-      //checking user password
+
       const isPasswordValid = await bcrypt.compare(dto.password, user.password);
       if (!isPasswordValid) {
-        throw new BadRequestException("Invalid Data, Please Try Again!");
+        throw new BadRequestException('Invalid credentials');
       }
-      //building token
-      const token = await this.jwtService.signAsync({ id: user.id, email: user.email }, {
-        secret: this.configService.get("JWT_KEY")
-      })
-      if (!token) throw new InternalServerErrorException("Internal Server Error In Building Token!");
-      //responsing
+
+      const token = await this.jwtService.signAsync(
+        { id: user.id, email: user.email },
+        { secret: this.configService.get<string>('JWT_KEY') },
+      );
+
       return {
-        message: "ok",
+        message: 'ok',
         data: {
           id: user.id,
-          username: user.username,
           email: user.email,
-          token: token
-        }
+          username: user.username,
+          token,
+        },
       };
-    }
-    catch (e: any) {
-      if (e instanceof NotFoundException || e instanceof BadRequestException) {
+    } catch (e) {
+      if (e instanceof BadRequestException || e instanceof NotFoundException) {
         throw e;
       }
-      throw new InternalServerErrorException("Internal Server Error", {
-        cause: new Error(),
-        description: e + "from login method in auth.service.ts"
-      });
+      throw new InternalServerErrorException('Internal server error');
     }
   }
+
   async register(dto: RegisterDto) {
     try {
-      //check is user exists?
-      const user = await this.prismaService.user.findFirst({ where: { email: dto.email } });
-      if (user) {
-        throw new BadRequestException("Invalid Data, Please Try Again!")
+      const exists = await this.prismaService.user.findFirst({
+        where: {
+          OR: [
+            { email: dto.email },
+            { username: dto.username },
+          ],
+        },
+      });
+
+      if (exists) {
+        throw new BadRequestException('User already exists');
       }
-      //hashing password
-      const salt = await bcrypt.genSalt(10);
-      const hash = await bcrypt.hash(dto.password, salt);
-      //creating a new User
-      const newUser = await this.prismaService.user.create({
+
+      const hash = await bcrypt.hash(dto.password, 10);
+
+      const user = await this.prismaService.user.create({
         data: {
-          email: dto.email,
-          username: dto.username,
-          password: hash
-        }
+          email: dto.email || "",
+          username: dto.username || "",
+          password: hash,
+        },
       });
-      //building token :
-      const token = await this.jwtService.signAsync({ id: newUser.id, email: newUser.email }, {
-        secret: this.configService.get("JWT_KEY")
-      });
-      if (!token) throw new InternalServerErrorException("Internal Server Error In Building Token!");
-      //responsing
+
+      const token = await this.jwtService.signAsync(
+        { id: user.id, email: user.email },
+        { secret: this.configService.get<string>('JWT_KEY') },
+      );
+
       return {
-        message: "ok",
+        message: 'ok',
         data: {
-          id: newUser.id,
-          email: newUser.email,
-          username: newUser.username,
-          token: token
-        }
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          token,
+        },
       };
-    }
-    catch (e: any) {
-      if (e instanceof NotFoundException || e instanceof BadRequestException) {
+    } catch (e) {
+      if (e instanceof BadRequestException) {
         throw e;
       }
-      throw new InternalServerErrorException("Internal Server Error", {
-        cause: new Error(),
-        description: e + "from login method in auth.service.ts"
-      });
+      throw new InternalServerErrorException('Internal server error');
     }
   }
-  //checking token
+
   async verifyTokens(data: VerifyTokenDto) {
-    try {
-      return {
-        message: "ok", data: {
-          id: data.id,
-          email: data.email
-        }
-      };
-    }
-    catch (e: any) {
-      throw new InternalServerErrorException("Internal Server Error in verifyTokens method from auth.service.ts file!");
-    }
+    return {
+      message: 'ok',
+      data: {
+        id: data.id,
+        email: data.email,
+      },
+    };
   }
-};
+}

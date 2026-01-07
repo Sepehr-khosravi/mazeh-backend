@@ -60,18 +60,18 @@ export class RecipeService {
           description: dto.description,
 
           gallery: {
-            create: dto.gallery.map(g => ({ url: g.url }))
+            create: dto.gallery?.map(g => ({ url: g.url }))
           },
 
           ingredients: {
-            create: dto.ingrediants.map(i => ({
+            create: dto.ingrediants?.map(i => ({
               name: i.name,
               amount: i.amount
             }))
           },
 
           steps: {
-            create: dto.steps.map(s => ({
+            create: dto.steps?.map(s => ({
               order: s.order,
               description: s.description
             }))
