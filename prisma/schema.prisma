@@ -15,7 +15,7 @@ datasource db {
 // ============================
 model User {
   id        Int      @id @default(autoincrement())
-  username  String
+  username  String   @unique
   email     String   @unique
   password  String
   profile   String   @default("https://www.transparentpng.com/download/user/gray-user-profile-icon-png-fP8Q1P.png")

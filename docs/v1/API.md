@@ -359,15 +359,22 @@ Not required.
 
 ```json
 {
-  "message": "ok",
-  "data": [
-    {
-      "id": 1,
-      "name": "Pasta",
-      "category": "Dinner",
-      "difficulty": "Easy"
-    }
-  ]
+    "message": "ok",
+    "data": [
+        {
+            "id": 1,
+            "name": "Pasta",
+            "time": 30,
+            "image": "https://default.com/image.png",
+            "icon": "https://default.com/icon.png",
+            "category": "Dinner",
+            "nationality": "Italian",
+            "rate": 5,
+            "difficulty": "Easy",
+            "description": "Classic Italian pasta",
+            "meal": "Main"
+        }
+    ]
 }
 ```
 
@@ -401,9 +408,6 @@ Authorization: Bearer <token>
   "difficulty": "Easy",
   "meal": "Main",
   "description": "Classic Italian pasta",
-  "gallery": [
-    { "url": "https://example.com/image.jpg" }
-  ],
   "ingrediants": [
     { "name": "Pasta", "amount": "200g" }
   ],

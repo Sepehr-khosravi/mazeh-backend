@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 //modules
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './routes/auth/auth.module';
-import { RecipeModule } from './routes/Recipe/recipe.module';
+import { RecipeModule } from './routes/recipe/recipe.module';
 import { StorageModule } from './routes/storage/storage.module';
 
 @Module({
