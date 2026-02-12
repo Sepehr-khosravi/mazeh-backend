@@ -6,7 +6,7 @@ import { AuthController } from "./auth.controller";
 import { ConfigModule } from "@nestjs/config";
 import { PrismaModule } from '../../common/prisma/prisma.module';
 import { JwtModule } from "@nestjs/jwt";
-import { AuthGuardModule } from "src/common/Guards/auth/jwt-auth.module";
+import { AuthGuardModule } from "src/common/guards/auth/jwt-auth.module";
 //config 
 import { ConfigService } from "@nestjs/config";
 const config = new ConfigService;
