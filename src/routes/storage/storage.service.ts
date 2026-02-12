@@ -16,209 +16,186 @@ export class StorageService {
 
     async findAll(userId: number) {
         try {
-            //getting all materials
             const materials = await this.prismaService.refrigerator.findMany({
                 where: {
                     userId: userId
                 }
             });
-            //cheking is that exist!
-            if (!materials) {
-                throw new NotFoundException("Materials Not Found!");
-            }
 
             return {
                 message: "ok",
-                data: materials
-            }
+                data: materials.map(material => ({
+                    id: material.id,
+                    name: material.name,
+                    type: material.type,
+                    count: material.count
+                }))
+            };
         }
         catch (e: any) {
-            if (e instanceof NotFoundException) return {
-                message: "Not Found Error!",
-                data: null,
-                error: true
-            };
-            console.log("findAll Error in StorageService from the stroage.service.ts!");
             throw new InternalServerErrorException("Internal Server Error");
         }
     }
 
     async addNewMaterials(data: { dto: MaterialDto, userId: number }) {
         try {
-            //checking does this material exist or not!
             const findMaterial = await this.prismaService.refrigerator.findFirst({
                 where: {
                     name: data.dto.name,
+                    type: data.dto.type,
                     userId: data.userId
                 }
             });
+
             if (findMaterial) {
                 throw new BadRequestException("This Material Already Exists!");
             }
 
-            //if it doesn't exist we would create that as a new material
-            const newData = {
-                name: data.dto.name,
-                userId: data.userId
-            }
             const newMaterial = await this.prismaService.refrigerator.create({
-                data: newData
+                data: {
+                    name: data.dto.name,
+                    type: data.dto.type,
+                    count: data.dto.count,
+                    userId: data.userId
+                }
             });
 
-            //responsing
             return {
                 message: "Created",
-                data : {
-                    name : newMaterial.name,
-                    amount : newMaterial.amount,
-                    id : newMaterial.id,
+                data: {
+                    id: newMaterial.id,
+                    name: newMaterial.name,
+                    type: newMaterial.type,
+                    count: newMaterial.count
                 }
-           };
+            };
         }
         catch (e: any) {
-            if(e instanceof BadRequestException) return {
-                message : "Bad Request",
-                data : null,
-                error : true
-            };
-            console.log("addNewMaterial Error in SotrageService class from the storage.service.ts file!");
+            if (e instanceof BadRequestException) {
+                throw e;
+            }
             throw new InternalServerErrorException("Internal Server Error");
         }
     }
 
     async plusAmount(materialId: number) {
         try {
-            //finding the Material :
             const findMaterial = await this.prismaService.refrigerator.findFirst({
-                where : {
-                    id : materialId
+                where: {
+                    id: materialId
                 }
             });
-            //checking this Exists or doesn't!
-            if(!findMaterial){
+
+            if (!findMaterial) {
                 throw new NotFoundException("This Material Not Found!");
-            };
-            //creating new data
-            const newData = {
-                name : findMaterial.name,
-                userId : findMaterial.userId,
-                amount : findMaterial.amount += 100,
-            };
-
-            //updaing this meteryal (only this amount!)
-            const UpdateMaterial = await this.prismaService.refrigerator.update({
-                where : {
-                    id : materialId
-                },
-                data : newData
-            });
-
-            //responsing
-            return {
-                message : "Ok",
-                data : {
-                    name : UpdateMaterial.name,
-                    amount : UpdateMaterial.amount,
-                    id : UpdateMaterial.id
-                }
             }
 
+            const updatedMaterial = await this.prismaService.refrigerator.update({
+                where: {
+                    id: materialId
+                },
+                data: {
+                    count: findMaterial.count + 100
+                }
+            });
+
+            return {
+                message: "Ok",
+                data: {
+                    id: updatedMaterial.id,
+                    name: updatedMaterial.name,
+                    type: updatedMaterial.type,
+                    count: updatedMaterial.count
+                }
+            };
         }
         catch (e: any) {
-            if(e instanceof NotFoundException) return {
-                message : "Not Found Error",
-                data : null,
-                error : true
+            if (e instanceof NotFoundException) {
+                throw e;
             }
-            console.log("plusAmount Error in StorageService class from storage.service.ts file!");
             throw new InternalServerErrorException("Internal Server Error");
         }
     }
 
     async minesAmount(materialId: number) {
         try {
-            //finding the Material :
             const findMaterial = await this.prismaService.refrigerator.findFirst({
-                where : {
-                    id : materialId
+                where: {
+                    id: materialId
                 }
             });
-            //checking this Exists or doesn't!
-            if(!findMaterial){
+
+            if (!findMaterial) {
                 throw new NotFoundException("This Material Not Found!");
-            };
-            //creating new data
-            const newData = {
-                name : findMaterial.name,
-                userId : findMaterial.userId,
-                amount : findMaterial.amount > 100 ? findMaterial.amount -= 100 : 100,
-            };
-
-            //updaing this meteryal (only this amount!)
-            const UpdateMaterial = await this.prismaService.refrigerator.update({
-                where : {
-                    id : materialId
-                },
-                data : newData
-            });
-
-            //responsing
-            return {
-                message : "Ok",
-                data : {
-                    name : UpdateMaterial.name,
-                    amount : UpdateMaterial.amount,
-                    id : UpdateMaterial.id
-                }
             }
 
+            if (findMaterial.count < 100) {
+                throw new BadRequestException(`Insufficient count! Current count is ${findMaterial.count}`);
+            }
+
+            const updatedMaterial = await this.prismaService.refrigerator.update({
+                where: {
+                    id: materialId
+                },
+                data: {
+                    count: findMaterial.count - 100
+                }
+            });
+
+            return {
+                message: "Ok",
+                data: {
+                    id: updatedMaterial.id,
+                    name: updatedMaterial.name,
+                    type: updatedMaterial.type,
+                    count: updatedMaterial.count
+                }
+            };
         }
         catch (e: any) {
-            if(e instanceof NotFoundException) return {
-                message : "Not Found Error!",
-                data : null,
-                error : true
+            if (e instanceof NotFoundException || e instanceof BadRequestException) {
+                throw e;
             }
-            console.log("plusAmount Error in StorageService class from storage.service.ts file!");
             throw new InternalServerErrorException("Internal Server Error");
         }
     }
 
-    async deleteMaterials(dto : {id : number, userId : number}){
-        try{
-            //checking does the same meterial exists in user Storage?
+    async deleteMaterials(dto: { id: number, userId: number }) {
+        try {
             const findMaterial = await this.prismaService.refrigerator.findFirst({
-                where : {
-                    id : dto.id,
-                    userId : dto.userId
+                where: {
+                    id: dto.id,
+                    userId: dto.userId
                 }
             });
-            if(!findMaterial){
+
+            if (!findMaterial) {
                 throw new NotFoundException("The Same Material Not Found In Your Refrigerator!");
             }
 
             await this.prismaService.refrigerator.delete({
-                where : {
-                    id : dto.id,
-                    userId : dto.userId
+                where: {
+                    id: dto.id,
+                    userId: dto.userId
                 }
             });
 
-
             return {
-                message : "Ok",
-            }
-
+                message: "Ok",
+                data: {
+                    id: findMaterial.id,
+                    name: findMaterial.name,
+                    type: findMaterial.type,
+                    count: findMaterial.count,
+                    deleted: true
+                }
+            };
         }
-        catch(e : any){
-            if(e instanceof NotFoundException) return {
-                message : "Not Found Error",
-                data : null,
-                error : true,
+        catch (e: any) {
+            if (e instanceof NotFoundException) {
+                throw e;
             }
-            console.log("deletematerials Error in StorageService class from storage.service.ts file : ", e);
             throw new InternalServerErrorException("Internal Server Error");
         }
     }
-
-};
+}
