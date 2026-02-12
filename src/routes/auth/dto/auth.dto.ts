@@ -34,7 +34,7 @@ export class RegisterDto {
 
     
     @AtLeastOne(["email", "username"], {
-        message : "خداثل یکی از اینا باید وارد شود username یا email."
+        message : "you must feel one of these (email, username) field"
     })
     _atLeastOneCheck: boolean;
 }
@@ -43,8 +43,15 @@ export class VerifyTokenDto {
     @IsNotEmpty()
     @IsString()
     id: number;
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     @IsEmail()
     email: string;
+    @IsOptional()
+    @IsString()
+    username : string;
+    @AtLeastOne(["email", "username"], {
+        message : "you must feel one of these (email, username) field"
+    })
+    _atLeastOneCheck : boolean;
 }

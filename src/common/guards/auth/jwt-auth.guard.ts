@@ -36,13 +36,13 @@ export class AuthGuard implements CanActivate{
       });
       request.user = {
         id : decode.id,
-        email : decode.email
+        email : decode.email,
+        username : decode.username
       };
       
       return true;
     }
     catch(e : any){
-          console.error("Error in AuthGuard from jwt-auth.guard.ts file.!");
           throw new UnauthorizedException();
     }
     }

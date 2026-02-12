@@ -245,6 +245,8 @@ describe("AuthService - verifyTokens", () => {
         const req: VerifyTokenDto = {
             id: 1,
             email: "test@gmail.com",
+            username : "test",
+            _atLeastOneCheck : true
         };
 
         const result = await authService.verifyTokens(req);

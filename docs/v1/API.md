@@ -43,6 +43,8 @@ Authenticates the user and returns an access token.
 
 ```json
 {
+  "username" : "string",
+  //or
   "email": "string",
   "password": "string"
 }
@@ -135,7 +137,7 @@ None.
   "data": {
     "id": "int",
     "email": "string",
-    "username": "string"
+    // "username": "string"
   }
 }
 ```

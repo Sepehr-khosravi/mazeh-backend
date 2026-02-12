@@ -34,7 +34,7 @@ export class AuthService {
       }
 
       const token = await this.jwtService.signAsync(
-        { id: user.id, email: user.email },
+        { id: user.id, email: user.email , username : user.username},
         { secret: this.configService.get<string>('JWT_KEY') },
       );
 
@@ -81,7 +81,7 @@ export class AuthService {
       });
 
       const token = await this.jwtService.signAsync(
-        { id: user.id, email: user.email },
+        { id: user.id, email: user.email, username : user.username },
         { secret: this.configService.get<string>('JWT_KEY') },
       );
 
@@ -103,12 +103,30 @@ export class AuthService {
   }
 
   async verifyTokens(data: VerifyTokenDto) {
-    return {
-      message: 'ok',
-      data: {
-        id: data.id,
-        email: data.email,
-      },
-    };
+    if(data.email && data.username){
+        return {
+          message: 'ok',
+          data: {
+            id: data.id,
+            email: data.email,
+            username : data.username
+          },
+        };
+    } else if(data.email && !data.username){
+      return {
+        message : 'ok',
+        data : {
+          id : data.id,
+          email : data.email,
+        }
+      }
+    } else if(!data.email && data.username){
+      return {
+        message : 'ok',
+        username : data.username
+      }
+    }else{
+      throw new BadRequestException("at least you must have one of these information as a user (email, username)");
+    }
   }
 }
