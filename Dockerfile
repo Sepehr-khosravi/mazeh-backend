@@ -1,39 +1,31 @@
-# Builder Stage
+# ---------- Builder ----------
 FROM node:20 AS builder
+
 WORKDIR /app
 
-# Copy package.json + package-lock.json
 COPY package*.json ./
-COPY tsconfig.json ./
-
 RUN npm install
 
-# Copy the rest of the project (including tsconfig.json and src/)
 COPY . .
-
-# Generate Prisma client
 RUN npx prisma generate --schema=prisma/schema.prisma
-
-# Build NestJS
 RUN npm run build
 
-# Production Stage
-FROM node:20-slim AS production
+
+# ---------- Production ----------
+FROM node:20-slim
+
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install --omit=production
+RUN npm install --omit=dev
 
-RUN npx prisma generate
-
-RUN npx prisma migrate deploy
-
-# Copy built code + Prisma client + env
+# 👇 خیلی مهم — این باید قبل از generate باشه
+COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/dist ./dist
-#COPY --from=builder /app/node_modules ./node_modules
-#COPY --from=builder /app/prisma ./prisma
-#COPY --from=builder /app/tsconfig.json ./tsconfig.json
-#COPY --from=builder /app/.env .env
+
+# 👇 حالا که schema هست، generate می‌کنیم
+RUN npx prisma generate --schema=prisma/schema.prisma
 
 EXPOSE 3000
-CMD ["node", "dist/src/main.js"]
+
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
