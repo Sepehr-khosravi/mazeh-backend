@@ -172,15 +172,15 @@ None.
 
 ```json
 {
-  "message": "ok",
-  "data": [
-    {
-      "id": 1,
-      "name": "Milk",
-      "amount": 500,
-      "userId": 1
-    }
-  ]
+    "message": "ok",
+    "data": [
+        {
+            "id": 1,
+            "name": "Sugar",
+            "type": "Meterials",
+            "count": 50
+        }
+    ]
 }
 ```
 
@@ -207,7 +207,9 @@ Authorization: Bearer <token>
 
 ```json
 {
-  "name": "Sugar"
+   "name" : "Sugar",
+   "type" : "Meterials",
+   "count" : 50
 }
 ```
 
@@ -215,12 +217,13 @@ Authorization: Bearer <token>
 
 ```json
 {
-  "message": "Created",
-  "data": {
-    "id": 2,
-    "name": "Sugar",
-    "amount": 100
-  }
+    "message": "Created",
+    "data": {
+        "id": 1,
+        "name": "Sugar",
+        "type": "Meterials",
+        "count": 50
+    }
 }
 ```
 
@@ -307,7 +310,7 @@ id: number (material ID)
 **Endpoint:**
 
 ```
-DELETE /storage/delete/:id
+DELETE /storage/delete/:id (for example we can use 1)
 ```
 
 **Description:**
@@ -329,7 +332,14 @@ id: number (material ID)
 
 ```json
 {
-  "message": "Ok"
+    "message": "Ok",
+    "data": {
+        "id": 1,
+        "name": "Sugar",
+        "type": "Meterials",
+        "count": 50,
+        "deleted": true
+    }
 }
 ```
 
@@ -401,19 +411,23 @@ Authorization: Bearer <token>
 
 ```json
 {
-  "name": "Pasta",
-  "time": 30,
-  "category": "Dinner",
-  "nationality": "Italian",
-  "difficulty": "Easy",
-  "meal": "Main",
-  "description": "Classic Italian pasta",
-  "ingrediants": [
-    { "name": "Pasta", "amount": "200g" }
-  ],
-  "steps": [
-    { "order": 1, "description": "Boil water" }
-  ]
+    "name" : "Pizza",
+    "time" : 3600,
+    "category" : "foods",
+    "nationality" : "Italyan",
+    "difficulty" : "medium",
+    "description" : "it's a Perfect and veryyyy good food for eating",
+    "meal" : "anywhen",
+    "gallery" : [],
+    "ingrediants" : [
+      {
+        "name" : "tomato", "amount" : 100  
+      }//......
+    ],
+    "steps" : [
+        {"order" : 1, "description" : "you need to buy all meteryals"},
+        {"order" : 2 , "description" : "just make it ready for eating"}
+    ]
 }
 ```
 
@@ -421,11 +435,20 @@ Authorization: Bearer <token>
 
 ```json
 {
-  "message": "Recipe created",
-  "data": {
-    "id": 1,
-    "name": "Pasta"
-  }
+    "message": "Recipe created",
+    "data": {
+        "id": 2,
+        "name": "Pizza",
+        "time": 3600,
+        "image": "https://default.com/image.png",
+        "icon": "https://default.com/icon.png",
+        "category": "foods",
+        "nationality": "Italyan",
+        "rate": 5,
+        "difficulty": "medium",
+        "description": "it's a Perfect and veryyyy good food for eating",
+        "meal": "anywhen"
+    }
 }
 ```
 
@@ -452,7 +475,7 @@ Authorization: Bearer <token>
 
 ```json
 {
-  "id": 1
+  "id": 2
 }
 ```
 
