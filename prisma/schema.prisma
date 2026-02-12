@@ -85,12 +85,14 @@ model Step {
   recipe      Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 }
 
-
 model Refrigerator {
   id     Int    @id @default(autoincrement())
-  name   String @unique
-  amount Int    @default(100)
+  name   String 
+  type   String 
+  count  Int    @default(100) 
   userId Int
 
-  user   User   @relation(fields: [userId], references : [id], onDelete: Cascade)
-} 
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([name, type, userId])
+}
