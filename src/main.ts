@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module';
 import { RequestMethod, ValidationPipe } from '@nestjs/common';
 //config
@@ -25,6 +25,6 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true
   }))
-  await app.listen(config.get("PORT") ?? 3000);
+  await app.listen(config.get("PORT") || 3000, "0.0.0.0");
 }
 bootstrap();
