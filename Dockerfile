@@ -24,6 +24,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --omit=production
 
+RUN npx prisma generate
+
+RUN npx prisma migrate deploy
+
 # Copy built code + Prisma client + env
 COPY --from=builder /app/dist ./dist
 #COPY --from=builder /app/node_modules ./node_modules
