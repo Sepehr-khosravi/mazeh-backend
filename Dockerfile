@@ -1,5 +1,5 @@
 # Builder Stage
-FROM node:24 AS builder
+FROM node:20 AS builder
 WORKDIR /app
 
 # Copy package.json + package-lock.json
@@ -18,18 +18,18 @@ RUN npx prisma generate --schema=prisma/schema.prisma
 RUN npm run build
 
 # Production Stage
-FROM node:24-slim AS production
+FROM node:20-slim AS production
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install --omit=dev
+RUN npm install --omit=production
 
 # Copy built code + Prisma client + env
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/tsconfig.json ./tsconfig.json
-COPY --from=builder /app/.env .env
+#COPY --from=builder /app/node_modules ./node_modules
+#COPY --from=builder /app/prisma ./prisma
+#COPY --from=builder /app/tsconfig.json ./tsconfig.json
+#COPY --from=builder /app/.env .env
 
 EXPOSE 3000
 CMD ["node", "dist/src/main.js"]
