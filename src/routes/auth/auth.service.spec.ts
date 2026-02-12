@@ -16,7 +16,7 @@ jest.mock("bcrypt", () => ({
 import * as bcrypt from "bcrypt";
 import { LoginDto, RegisterDto, VerifyTokenDto } from "./dto";
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { AuthGuard } from "src/common/Guards/auth/jwt-auth.guard";
+import { AuthGuard } from "src/common/guards/auth/jwt-auth.guard";
 
 const mockPrisma = {
     user: {

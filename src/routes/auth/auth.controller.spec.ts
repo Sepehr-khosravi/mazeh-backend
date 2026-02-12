@@ -2,8 +2,9 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { AuthController } from "./auth.controller";
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto } from "./dto";
-import { AuthGuard } from "src/common/Guards/auth/jwt-auth.guard";
 
+
+import { AuthGuard } from "src/common/guards/auth/jwt-auth.guard";
 
 //errors
 import {
@@ -20,7 +21,12 @@ let mockAuthService;
 describe("AuthController - login", () => {
     let authController: AuthController;
     let authService: AuthService;
-
+    let dto : LoginDto = {
+        username : "Test",
+        email : "test@gmail.com",
+        password : "1234",
+        _atLeastOneCheck : true
+    }
 
     beforeEach(async () => {
         jest.clearAllMocks();
@@ -49,10 +55,6 @@ describe("AuthController - login", () => {
 
 
     it("should call authService.login with correct dto", async () => {
-        const dto: LoginDto = {
-            email: "test@gmail.com",
-            password: "1234567",
-        };
 
         await authController.login(dto);
 
@@ -60,10 +62,6 @@ describe("AuthController - login", () => {
     });
 
     it("should return service result", async () => {
-        const dto: LoginDto = {
-            email: "test@gmail.com",
-            password: "1234567",
-        };
 
         mockAuthService.login.mockResolvedValue({ message: "ok" });
 
@@ -73,11 +71,6 @@ describe("AuthController - login", () => {
     });
 
     it("should throw a not found Error if user doesn't exist", async () => {
-
-        const dto: LoginDto = {
-            email: "testNotFound@gmail.com",
-            password: "1234567",
-        };
 
         const error = new NotFoundException();
 
@@ -91,6 +84,12 @@ describe("AuthController - register", () => {
     let authController: AuthController;
     let authService: AuthService;
 
+    let dto : RegisterDto = {
+        username : "Test",
+        email : "test@gmail.com",
+        password : "12345",
+        _atLeastOneCheck : true
+    };
 
     beforeEach(async () => {
         jest.clearAllMocks();
@@ -117,11 +116,6 @@ describe("AuthController - register", () => {
 
 
     it("should call authService.register with correct dto", async () => {
-        const dto: RegisterDto = {
-            username: "test",
-            email: "test@gmail.com",
-            password: "1234567"
-        };
 
         await authController.register(dto);
 
@@ -129,11 +123,6 @@ describe("AuthController - register", () => {
     });
 
     it("should return authService.register result", async () => {
-        const dto: RegisterDto = {
-            username: "test",
-            email: "test@gmail.com",
-            password: "1234567",
-        };
 
         mockAuthService.register.mockResolvedValue({ message: "ok" });
 
@@ -143,11 +132,6 @@ describe("AuthController - register", () => {
     })
 
     it("should throw bad request when user has already existed", async () => {
-        const dto: RegisterDto = {
-            username: "test",
-            email: "test@gmail.com",
-            password: "1234567"
-        };
 
         const error = new BadRequestException();
 

@@ -13,7 +13,7 @@ import {
 
 
 //auth Gaurd 
-import { AuthGuard } from '../../common/Guards/auth/jwt-auth.guard';
+import { AuthGuard } from "src/common/guards/auth/jwt-auth.guard";
 
 
 //dto
